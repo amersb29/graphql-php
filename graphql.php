@@ -71,20 +71,41 @@ try {
         ],
     ]);
 	
+	$RegionType = new ObjectType([
+        'name' => 'RegionType',
+        'fields' => [
+            'id_region' => [ 'type' => Type::int() ],
+			'nombre' => [ 'type' => Type::string() ]
+        ],
+    ]);
+	
 	$UserType = new ObjectType([
         'name' => 'UserType',
         'fields' => [
             'id_usuario' => [ 'type' => Type::int() ],
-			'usr_nombre' => [ 'type' => Type::string() ],
-			'usr_apPaterno' => [ 'type' => Type::string() ],
-			'usr_apMaterno' => [ 'type' => Type::string() ],
-			'isAdmin' => [ 'type' => Type::boolean() ]
+			'idRegion' => [ 'type' => Type::int() ],
+			'usr_nombre' => [ 'type' => Type::string() ],			
+			'isAdmin' => [ 'type' => Type::boolean() ],
+			'region' => [ 'type' => $RegionType,			
+						  'resolve' => function ($root, $args) {								
+								return callAPI('GET', 'http://localhost:9080/api/api.php/records/cregiones/' . $root->idRegion, false);
+							}
+						]
         ],
     ]);
 	
 	$RootQuery = new ObjectType([
         'name' => 'RootQueryType',
         'fields' => [
+			'region' => [
+					'type' => $RegionType,
+					'args' => [
+						'id' => ['type' => Type::int()],
+					],
+					'resolve' => function ($root, $args) {
+						return callAPI('GET', 'http://localhost:9080/api/api.php/records/cregiones/' . $args['id'], false);
+					}
+				],
             'user' => [
                 'type' => $UserType,
                 'args' => [
@@ -99,7 +120,7 @@ try {
                 'resolve' => function ($root, $args) {
                     return callAPI('GET', 'http://localhost:9080/api/api.php/records/tusuarios/', false);
                 }
-            ],
+            ]
         ],
     ]);
 	
